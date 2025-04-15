@@ -19,9 +19,9 @@ define both
 	done
 endef
  
-pull:;   $(call both,git pull)
-push:;   $(call both,git commit -am saving && git push && git status)
-status:; $(call both,git status)
+pull:;   $(call both, git pull)
+push:;   $(call both, git commit -am saving && git push && git status)
+status:; $(call both, git status)
 
 install:
 	cargo install mdbook-alerts
