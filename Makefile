@@ -21,4 +21,6 @@ status:
 
 build:
 	cd $(Here)/docs; mdbook build
-	cd $(There)/docs; touch .nojeklyll; git add .nojekyll .gitignore
+	cd $(There)/docs; touch .nojeklyll; \
+		git add .nojekyll .gitignore; \
+		git commit -am config
