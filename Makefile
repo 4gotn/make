@@ -12,6 +12,10 @@ push:
 install:
 	cargo install mdbook-alerts
 
+status:
+	printf "\n--------\n$(Here)\n\n";  cd $(Here); git status
+	printf "\n--------\n$(There)\n\n"; cd $(There); git status
+
 build:
 	cd $(Here)/docs; mdbook build
-	cd $(There)/docs; touch .nojeklyll; git add .nojekyll
+	cd $(There)/docs; touch .nojeklyll; git add .nojekyll .gitignore
