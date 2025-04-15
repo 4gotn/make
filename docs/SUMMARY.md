@@ -1,5 +1,6 @@
 ![](img/summary.png)
 
-- [Chapter 1](./chapter_1.md)
+- [Cover](./cover.md)
+- [Reviews](./reviews.md)
 - [Chapter 2](./chapter_2.md)
 
