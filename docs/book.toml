@@ -6,7 +6,7 @@ multilingual = false
 src = "."  # Use current directory for markdown files
 
 [build]
-build-dir = "../../4gotn.github.io"
+build-dir = "../../4gotn.github.io/docs"
 
 # ADD THIS
 [preprocessor.alerts]
