@@ -1,16 +1,17 @@
-# Chapter 1
+About:
 
-> [!NOTE]  
-> Hsghlight information that users should take into account, even when skimming.
 
-> [!TIP]
-> Optional information to help a user be more successful.
 
-> [!IMPORTANT]  
-> Crucial information necessary for users to succeed.
+> *"Every page is a gentle slap reminding us that AI isn’t magic—it’s math wrapped in marketing."*     
+> — Javier Rossi, Principal Software Craftsman, Stack Underflow
 
-> [!WARNING]  
-> Critical content demanding immediate user attention due to potential risks.
+> *"Finally, a book that dares to whisper what we've all screamed into the void."*    
+> — Dr. Lena Petrova, Senior Research Fellow, Quantum Weave Institute
 
-> [!CAUTION]
-> Negative potential consequences of an action.
+> *"This book is the antidote to the collective amnesia setting in."*   
+> — Dr. Kaelen Vance, Chief Ontologist, Aether Cognition Labs
+
+> *"While reading it, I realzied that we were so mesmerized by what we could do, we forgot to ask how if we  should."*    
+> — Lila Loop, Principal Engineer, Infinite Sprint LLC
+
+
