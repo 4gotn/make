@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    {{> head}}
+  </head>
+  <body>
+    <div id="page">
+      <div id="sidebar" class="sidebar">
+        <div style="text-align:center; padding: 10px;">
+          <img src="img/summary.png" alt="Logo" style="max-width: 80%; border-radius: 8px;" />
+        </div>
+        {{{ sidebar }}}
+      </div>
+
+      <div id="content" class="content">
+        {{{ content }}}
+      </div>
+    </div>
+    {{!-- {{> before-body-end}} --}}
+  </body>
+</html>
+

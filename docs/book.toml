@@ -6,10 +6,5 @@ multilingual = false
 src = "."  # Use current directory for markdown files
 
 [build]
-build-dir = "../../../4gotn.github.io"
-
-[output.html]
-# You can customize HTML settings here
-
-# Remove invalid/missing plugin config
+build-dir = "../../4gotn.github.io"
 
