@@ -5,8 +5,8 @@ SHELL=/bin/bash
 Here=$(shell git rev-parse --show-toplevel)
 There=$(Here)/../4gotn.github.io
 
-H=\033[0;1;31m\n-------------------------\n$(Here)\n\n\033[0m
-T=\033[0;1;33m\n-------------------------\n$(There)\n\n\033[0m
+H=\033[0;1;31m\n$(Here)\n\n\033[0m
+T=\033[0;1;33m\n$(There)\n\n\033[0m
 
 pull:
 	@printf "$H"; cd $(Here);  git pull
