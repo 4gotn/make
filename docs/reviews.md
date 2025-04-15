@@ -10,7 +10,7 @@
 > *"This book is the antidote to the collective amnesia setting in."*   
 > — **Dr. Kaelen Vance**, Chief Ontologist, Aether Cognition Labs
 
-> *"Reminds us about he difference between should and could."*    
+> *"Just because we could use big AI, does not mean we should."   
 > — **Lila Loop**, Principal Engineer, Infinite Sprint LLC
 
 (\*) not
