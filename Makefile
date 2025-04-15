@@ -8,6 +8,10 @@ There=$(Here)/../4gotn.github.io
 H=\033[0;1;31m\n-------------------------\n$(Here)\n\n\033[0m
 T=\033[0;1;33m\n-------------------------\n$(There)\n\n\033[0m
 
+pull:
+	@printf "$H"; cd $(Here);  git pull
+	@printf "$T"; cd $(There); git pull
+
 push:
 	@printf "$H"; cd $(Here);  git commit -am saving; git push; git status
 	@printf "$T"; cd $(There); git commit -am saving; git push; git status
