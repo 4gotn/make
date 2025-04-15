@@ -28,4 +28,5 @@ install:
 
 build:
 	cd $(Here)/docs && mdbook build
+	open $(There)/docs/index.html
 
