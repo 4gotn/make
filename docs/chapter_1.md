@@ -1,7 +1,7 @@
 # Chapter 1
 
 > [!NOTE]  
-> Highlights information that users should take into account, even when skimming.
+> Hsghlight information that users should take into account, even when skimming.
 
 > [!TIP]
 > Optional information to help a user be more successful.
