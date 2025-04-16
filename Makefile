@@ -8,7 +8,7 @@ Repos := $(Here) $(There)
 		
 define both
    $(foreach d, $(Repos), \
-      @cd $d; echo; figlet -w 100 -W -f mini $(notdir $d); echo; $(1); )
+      - @cd $d; echo; figlet -w 100 -W -f mini $(notdir $d); echo; $(1); )
 endef
  
 pull:;   $(call both, git pull)
