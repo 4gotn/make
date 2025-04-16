@@ -10,13 +10,13 @@ H := \033[0;1;31m
 T := \033[0;1;33m
 Z := \033[0m
 
+
+#	@for dir in $(Repos); do \
+#		name=$$(basename $$dir); figlet -W $$(name); cd $$dir && $(1); \ 
+#	done
+		
 define both
-	@for dir in $(Repos); do \
-		name=$$(basename $$dir); \
-		color=$$( [ "$$name" = "4gotn.github.io" ] && echo "$(T)" || echo "$(H)" ); \
-		printf "$$color\n====> $$dir\n\n$(Z)"; \
-		cd $$dir && $(1); \
-	done
+   $(foreach d,$(Repos), cd $d; $(1); )
 endef
  
 pull:;   $(call both, git pull)
