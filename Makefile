@@ -8,12 +8,12 @@ Repos := $(Here) $(There)
 		
 define both
    $(foreach d, $(Repos), \
-      @cd $d; echo; figlet -w 100 -W -f mini $(notdir $d); echo; $(1); )
+      @ cd $d; echo; figlet -w 100 -W -f mini $(notdir $d); echo; $(1); )
 endef
  
-pull:;   - $(call both, git pull)
-push:;   - $(call both, git commit -am saving && git push && git status)
-status:; - $(call both, git status)
+pull:;    $(call both, git pull)
+push:;   $(call both, git commit -am saving && git push && git status)
+status:; $(call both, git status)
 
 install:
 	cargo install mdbook-alerts
@@ -21,4 +21,3 @@ install:
 build:
 	cd $(Here)/docs && mdbook build
 	open $(There)/docs/index.html
-
