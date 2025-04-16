@@ -16,7 +16,7 @@ Z := \033[0m
 #	done
 		
 define both
-   $(foreach d,$(Repos), cd $d; figlet -W $(notdir $d); $(1); )
+   $(foreach d,$(Repos), cd $d; figlet -W -f small $(notdir $d); $(1); )
 endef
  
 pull:;   $(call both, git pull)
