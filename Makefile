@@ -5,15 +5,14 @@ SHELL=/bin/bash
 Here  := $(shell git rev-parse --show-toplevel)
 There := $(Here)/../4gotn.github.io
 Repos := $(Here) $(There)
-		
-define both
-   $(foreach d, $(Repos), \
-      cd $d; echo; figlet -w 100 -W -f mini $(notdir $d); echo; $(1); )
+
+define each
+   $(foreach d,$(Repos),cd $d; figlet -w 100 -W -f mini $(notdir $d); $(1);)
 endef
  
-pull:;   @$(call both, git pull)
-push:;   @$(call both, git commit -am saving && git push && git status)
-status:; @$(call both, git status)
+pull:;   @$(call each, git pull)
+push:;   @$(call each, git commit -am saving && git push && git status)
+status:; @$(call each, git status)
 
 install:
 	cargo install mdbook-alerts
