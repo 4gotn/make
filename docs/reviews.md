@@ -14,5 +14,4 @@
 > — **Javier Rossi**, Principal Software Craftsman, Stack Underflow
 
 
-
-(\*) ish
+(\*) sort of
