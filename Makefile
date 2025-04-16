@@ -7,7 +7,7 @@ There := $(Here)/../4gotn.github.io
 Repos := $(Here) $(There)
 
 define each
-   $(foreach d,$(Repos),cd $d; figlet -w 100 -W -f mini $(notdir $d); $(1);)
+	$(foreach d, $(Repos), cd $d; figlet -w 100 -W -f mini $(notdir $d); $(1);)
 endef
  
 pull:;   @$(call each, git pull)
