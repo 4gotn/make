@@ -6,7 +6,7 @@ Here  := $(shell git rev-parse --show-toplevel)
 There := $(Here)/../4gotn.github.io
 Repos := $(Here) $(There)
 
-define each
+define every
 	$(foreach d, $(Repos), cd $d; figlet -w 100 -W -f mini $(notdir $d); $(1);)
 endef
  
@@ -17,13 +17,13 @@ help:  ## Show this help menu
         ' $(MAKEFILE_LIST)
 
 pull: ## refresh from online repos
-	@$(call both, git pull)
+	@$(call every, git pull)
 
 push: ## save to online repo
-	@$(call both, git commit -am saving && git push && git status)
+	@$(call every, git commit -am saving && git push && git status)
 
 status: ## find uncommited files
-	@$(call both, git status)
+	@$(call every, git status)
 
 install: ## esnure rust is ready
 	cargo install mdbook-alerts
