@@ -13,8 +13,7 @@ endef
 help:  ## Show this help menu
 	@gawk 'BEGIN {FS = ":.*?## "}    \
          /^[a-zA-Z0-9_-]+:.*?## / { \
-            printf "  \033[1m%-15s\033[0m %s\n", $$1, $$2} \
-        ' $(MAKEFILE_LIST)
+            printf "  \033[1m%-15s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 pull: ## refresh from online repos
 	@$(call every, git pull)
@@ -32,5 +31,4 @@ build: ## update book
 	cd $(Here)/docs && mdbook build
 	open $(There)/docs/index.html
 
-publish: ## update book and push online
-	build push
+publish: build push ## update book and push online

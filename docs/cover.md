@@ -1,4 +1,4 @@
 <center>
-<img src="img/sail.png" width=500 style="margin-top:110px;">
+<img src="img/sailwords.png" width=450 style="margin-top:110px;">
 </center>
 
