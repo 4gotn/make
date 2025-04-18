@@ -20,7 +20,7 @@ pull: ## refresh from online repos
 	@$(call every, git pull)
 
 push: ## save to online repo
-	@$(call every, git commit -am saving && git push && git status)
+	@$(call every, git diff --quiet || git commit -am saving && git push && git status)
 
 status: ## find uncommited files
 	@$(call every, git status)
