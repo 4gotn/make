@@ -5,19 +5,18 @@ SHELL=/bin/bash
 Here  := $(shell git rev-parse --show-toplevel)
 There := $(Here)/../4gotn.github.io
 Repos := $(Here) $(There)
-		
-define both
-   $(foreach d, $(Repos), \
-      cd $d; echo; figlet -w 100 -W -f mini $(notdir $d); echo; $(1); )
-endef
 
+define each
+	$(foreach d, $(Repos), cd $d; figlet -w 100 -W -f mini $(notdir $d); $(1);)
+endef
+ 
 help:  ## Show this help menu
 	@gawk 'BEGIN {FS = ":.*?## "}    \
          /^[a-zA-Z0-9_-]+:.*?## / { \
             printf "  \033[1m%-15s\033[0m %s\n", $$1, $$2} \
         ' $(MAKEFILE_LIST)
 
-pull: ## refresh from online repo
+pull: ## refresh from online repos
 	@$(call both, git pull)
 
 push: ## save to online repo
