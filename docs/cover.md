@@ -1,4 +1,5 @@
-<center>
-<img src="img/sailwords.png" width=450 style="margin-top:110px;">
-</center>
-
+<div style="display: flex;"
+  <center>
+    <img width=300 src="img/sailwords.png" style="flex:2;">
+  </center>
+</div>
