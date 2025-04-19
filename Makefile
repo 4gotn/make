@@ -7,7 +7,7 @@ There := $(Here)/../4gotn.github.io
 Repos := $(Here) $(There)
 
 define every
-	$(foreach d, $(Repos), cd $d; figlet -w 100 -W -f mini $(notdir $d); $(1);)
+	$(foreach d,$(Repos),cd $d; figlet -w 100 -W -f contessa $(notdir $d); $(1);)
 endef
  
 help:  ## Show this help menu
@@ -19,7 +19,7 @@ pull: ## refresh from online repos
 	@$(call every, git pull)
 
 push: ## save to online repo
-	@$(call every, git diff --quiet || git commit -am saving && git push && git status)
+	@$(call every,git diff --quiet||git commit -am saving&&git push&&git status)
 
 status: ## find uncommited files
 	@$(call every, git status)
