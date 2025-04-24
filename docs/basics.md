@@ -9,6 +9,8 @@ show them the comamnd-z undo command
 
 search is evil: search everything and no cognitive tasks
 
+it like we are training surgeons who have turned their back on their patients. they've never leared what aprts conenct to waht on the human body, which is fine whyen the body is working. but if gd firbid. soemthing rbeaks or if we ar bulding a new person, then those people wont know where to look for what or which connects to where. 
+
 firle structure. save to desktop and no 
 
 not lazier, but distracted. which is fine for rest of the world but for the people
