@@ -7,7 +7,7 @@ There := $(Here)/../4gotn.github.io
 Repos := $(Here) $(There)
 
 define every
-	$(foreach d,$(Repos),cd $d; figlet -w 100 -W -f contessa $(notdir $d); $(1);)
+	$(foreach d,$(Repos),cd $d; tput bold; figlet -w 100 -W -f contessa $(notdir $d); tput sgr0; $(1);)
 endef
  
 help:  ## Show this help menu
