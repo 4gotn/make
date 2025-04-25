@@ -10,7 +10,7 @@ define every
   $(foreach d,$(Repos), \
     cd $d; echo -en "\033[1;31m"; \
     figlet -w 100 -W -f contessa $(notdir $d); \
-    echo -en "\033[0m"; $(1);)
+    echo -en "\033[0m"; $(1) 2>/dev/null;)
 endef
  
 help:  ## Show this help menu
