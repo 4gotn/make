@@ -1,4 +1,14 @@
 
+why teach basics:
+cause one day you won't have your tools
+https://www.theregister.com/AMP/2025/04/24/microsoft_vs_code_subtracts_cc_extension/
+
+cause one day u wnt trust your tools
+e.g. msoft buys gitgub 
+
+cause one day ur tools go away
+slqite, the berkely DB storey
+
 
 
 can u use a keyboard?
