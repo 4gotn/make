@@ -31,7 +31,10 @@ install: ## esnure rust is ready
 	cargo install mdbook-alerts
 
 build: ## update book
-	cd $(Here)/docs && mdbook build
+	cd $(Here)/docs;  PATH="$$PATH:/Users/timm/.cargo/bin" mdbook build
 	open $(There)/docs/index.html
 
 publish: build push ## update book and push online
+
+sh: ## create a good local environment
+	bash --init-file $(Here)/etc/dotshellrc -i
