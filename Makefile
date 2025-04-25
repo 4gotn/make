@@ -8,7 +8,7 @@ Repos := $(Here) $(There)
 
 define every
   $(foreach d,$(Repos), \
-    cd $d; echo -e "\033[1;31m"; \
+    cd $d; echo -e "\033[1;34m"; \
     figlet -w 100 -W -f contessa $(notdir $d); \
     echo -e "\033[0m"; $(1);)
 endef
