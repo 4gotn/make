@@ -1,65 +1,46 @@
-#  About this Book
+#  Easier AI
 
-Many, many 
-people
-assume that  Big AI (e.g. Large Language Models, or
-LLMs) are the inevitable and best future path for Artificial
-Intelligence.  
+This book aims to show a simpler way to do many things. 
+A repeated result is that learners learn better if they can pick their own training data.
+By reflecting on what has  been learned so far, they can avoid the confusing, skip over the redundancies,
+and focus on the important parts of the data.
 
-This book invites you to question that assumption.
-
-To be clear: I use big AI, a lot,     for solo and tactical tasks
-such as condensing my written arguments. But for
-strategic tasks that might be critiqued externally, I need other
-tools that are faster, simpler, and whose reasoning can be explained
-and audited.  So while I do not want to replace big AI,  I want to
-ensure we are   also supporting and exploring alternatives.
-
-In software engineering (SE), there is very
-little exploration of alternatives
-to LLMs. A recent systematic review found 
-only 5% of hundreds of SE LLM papers 
-[considered alternatives](refs.html#hou2024). 
-This a major methodological
-mistake that ignores simpler and faster methods.  For instance, UCL
-researchers found 
-[SVM+TF-IDF methods outperform](refs.html#tawosi2023) standard
-"Big AI" for effort estimation (100 times faster, with greater
-accuracy) .
-
-In SE, one  reason for asking if not LLM, then what?" is that
-software   often exhibits "funneling": i.e. despite internal
+This technique is called [active learning](refs.html#settles2009).
+And it can be extraordinary effective.
+For example, in software engineering (SE), systems
+often exhibits "funneling": i.e. despite internal
 complexity, software
 [behavior converges to few outcomes](refs.html#menzies2007a), 
 enabling
-[simpler reasoning](refs.html#lustosa2025).  Funneling  explains how my "BareLogic"  active
+[simpler reasoning](refs.html#lustosa2025).  Funneling  explains how my imple BareLogic"  active
 learner can build
    models using  very little data
 for (e.g.)  63   SE multi-objective optimization tasks from the
-[MOOT repository](refs.html#menziesmoot).  
+[MOOT repository](refs.html#menziesmoot).
 These   tasks are quite diverse and include
-software process decisions, optimizing configuration parameters,
-and tuning learners for better analytics. Successful MOOT modeling
-results in better advice for project managers, better control of
+
+- software process decisions, 
+- optimizing configuration parameters,
+- tuning learners for better analytics. 
+
+Successful 
+for this MOOT problems results (e.g.) better advice for project managers, better control of
 software options, and enhanced analytics from learners that are
 better tuned to the local data.
 
 MOOT includes 100,000s of examples with up to  a thousand settings.
-Each example is labelled with up to five effects. In practice,
-obtaining  labels is  slow, expensive and error-prone. Hence the
- [task of active learners](refs.html#settles2009)
-  like BareLogic is to find the best example(s),
+Each example is labelled with up to five effects.   BareLogic's task is to find the best example(s),
 after requesting the   least number of labels .  To do this,
  BareLogic labels  `N=4` rest examples, then it:
 
-- Scores and sorts labeled examples by "distance to heaven" (where
+1. Scores and sorts labeled examples by "distance to heaven" (where
 "heaven" is the ideal target for optimization, e.g., weight=0, mpg=max)
-- Splits the sort into `sqrt(𝑁)` `best` and `𝑁−sqrt(𝑁)` `rest` examples.
-- Trains a two-class Bayes classifier on the `best` and `rest` sets.
-- Finds the unlabeled example `X` that is most likely `best` via   
+2. Splits the sort into `sqrt(𝑁)` `best` and `𝑁−sqrt(𝑁)` `rest` examples.
+3. Trains a two-class Bayes classifier on the `best` and `rest` sets.
+4. Finds the unlabeled example `X` that is most likely `best` via   
   `argmax(x):log(like(best|X)) - log(log(rest|X))`
-- Labels `X`, then increments `N`.
-- If `X` &lt; `Stop` labeled examples.
+5. Labels `X`, then increments `N`.
+6. If `X` &lt; `Stop` then loop back to step1. Else return `most` (the `best[0]` item) and a regression tree built from the labeled examples.
 
 BareLogic was written for teaching purposes as a simple demonstrator
 of   active learning. But in a result consistent with "funneling",
@@ -75,7 +56,7 @@ tasks:
 - etc.
 
 <center>
-<img src="img/63.png">
+<img src="../img/63.png">
 <b>
 Figure: 20 runs of BareLogic on 63 multi-objective tasks. <br>  
 Histogram shows mean <tt>(1 − (most − b4.min)/(b4.mu − b4.min))</tt>.   
@@ -87,8 +68,8 @@ examples.
 </center>
 
 The lesson here is that achieving state-of-the-art results can ne
-achieved with smarter questioning, not planetary-scale computation.
-Active learning addresses many common  LLM concerns such as slow
+achieved with smarter questioning, not planetary-scale computation (i.e. big AI tools like large language models, or LLMs).
+Active learning addresses many common  concerns about AI such as slow
 training times, excessive energy needs, esoteric hardware requirements,
 testability, reproducibility, and  explainability.
 
@@ -124,55 +105,3 @@ giant models are not always necessary.
 further, showing that leaner, smarter modeling can achieve great results. 
   - So
 why not, before we build the behemoth, try something smaller and faster?
-
-
-
-## About the author:
-
-Tim Menzies is a ACM Fellow, an IEEE Fellow, a Professor of Computer
-Science at NC State University. He specializing in data-driven,
-explainable, and minimal AI for software engineering. He serves on
-the editorial board of IEEE Transactions on SE and as Editor-in-Chief
-of the Automated Software Engineering journal. More info:
-http://timm.fyi.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
