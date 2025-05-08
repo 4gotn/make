@@ -6,10 +6,18 @@ forgo: active learning for explainable multi-objective optimization
 Options:
   -h         show help
   -p p       distance coefficient           = 2
-  -f file    csv data file                  = auto93.csv
+  -f file    csv data file                  = ../../moot/optimize/misc/auto93.csv
   -s some    sub-samples used for distances = 128
   -l leaf    min number leaves per tree     = 2
   -r rseed   random number seed             = 1234567890
+
+Demos: 
+  --the      show settings
+  --csv      show csv reader
+  --cols     show col generation
+  --data     show columns after reading data
+  --subs     show we can incrementally add/delete rows
+  --kpp      show kmeans++ centroids
 """
 import fileinput, random, math, sys, re
 sys.dont_write_bytecode = True
@@ -18,19 +26,27 @@ sys.dont_write_bytecode = True
 class o: 
   __init__ = lambda i,**d: i.__dict__.update(**d)
   __repr__ = lambda i: i.__class__.__name__ + '(' + ' '.join(
-                       [f":{k} {show(v)}" for k,v in i.__dict__.items()]) + ')'
+                       [f":{k} {say(v)}" for k,v in i.__dict__.items()]) + ')'
 
-def show(x):
+def say(x):
   if type(x) == float:
     less = x // 1
     return str(less) if x==less else f"{x:.3f}".rstrip("0").rstrip(".")
   return str(x)
 
-def eq(v,x): return v == x
-def le(v,x): return v <= x 
-def gt(v,x): return v >  x
+def eq(v,x): 
+  "="
+  return v == x
+  
+def le(v,x): 
+  "<="
+  return v <= x 
+  
+def gt(v,x): 
+  ">"
+  return v >  x
 
-def test(row,t) : return t.test(row[t.at],t.x)
+def selects(row,t) : return t.test(row[t.at],t.x)
 
 #------------------------------------------------------------------------------
 class Col(o):
@@ -43,6 +59,11 @@ class Col(o):
     return x
 
   def sub(i,x,n=1): return i.add(x, n=n, flip = -1) 
+
+  def values(i,rows):
+    for row in rows:
+      x = row[i.at]
+      if x !="?": yield x,row
      
 #------------------------------------------------------------------------------
 class Num(Col):
@@ -53,7 +74,8 @@ class Num(Col):
 
   def mid(i)   : return i.mu
   def norm(i,x): return x if x=="?" else (x-i.lo)/(i.hi-i.lo+1e-32)
-  def var(i)   : return i.n < 2 and 0 or (max(0,i.m2)/(i.n - 1))**0.5
+  def var(i)   : 
+    return 0 if i.n <= 2 else (max(0,i.m2)/(i.n - 1))**0.5
     
   def add1(i, x, n=1, flip=1):  
     i.lo = min(i.lo,x)
@@ -144,7 +166,7 @@ class Data(o):
     out, mem = [row], {}
     for _ in range(1, k):
       dists = [min(D(x, y)**2 for y in out) for x in rows]
-      r = random.random() * sum(dists)
+      r     = random.random() * sum(dists)
       for j, d in enumerate(dists):
         r -= d
         if r <= 0:
@@ -152,18 +174,26 @@ class Data(o):
           break
     return out, mem
 
+  def nodes(i,lvl=0, key=None):
+    yield lvl,i
+    for kid in (sorted(i.kids, key=key) if key else i.kids):
+      for node1 in kid.nodes(lvl+1, key=key):
+        yield node1
+     
   def sub(i, row, purge=True):
     i.cols.sub(row)
     if purge: i.rows.remove(row)
 
-  def tree(i, rows, Y=None, Klass=Num, test=lambda _: True):
+  def tree(i, rows=None, Y=None, Klass=Num, test=None):
     Y         = Y or (lambda row: i.ydist(row))
+    rows      = rows or i.rows
     here      = i.clone(rows)
+    here.ys   = i.ydists(rows)
     here.test = test 
     here.kids = []
     for test1 in min([col.cuts(rows,Y,Klass) for col in i.cols.x],
                      key=lambda x:x.var).tests:
-      rows1 = [row for row in rows if test(row,test1)]
+      rows1 = [row for row in rows if selects(row,test1)]
       if the.leaf <= len(rows1) < len(rows):
         here.kids += [i.tree(rows1, Y, Klass, test1)]
     return here
@@ -177,7 +207,7 @@ class Data(o):
     p = the.p
     def fun(c): return abs(c.goal - c.norm(row[c.at]))
     return (sum(fun(c)**p for c in i.cols.y) / len(i.cols.y))**(1/p)
-
+  
 #------------------------------------------------------------------------------
 def shuffle(lst): random.shuffle(lst); return lst
 
@@ -258,23 +288,39 @@ def eg__cols(_) :
 def eg__data(_) :
   [print(col) for col in Data(csv(the.file)).cols.all]
 
-def eg__data(_) :
-  a = Data(csv(the.file))
+def eg__subs(_) :
+  a   = Data(csv(the.file))
   b,c = a.clone(), a.clone()
+  tmp = []
   for j,row in enumerate(a.rows):
     c.add(b.add(row))
-    if len(c.rows)==200: [print(c) for c in c.cols.x]
+    if len(c.rows)==200: tmp += [str(c) for c in c.cols.x]
   for j,row in enumerate(a.rows[::-1]):
     c.sub(row)
-    if len(c.rows)==200: [print(c) for c in c.cols.x]
+    if len(c.rows)==200: tmp += [str(c) for c in c.cols.x]
+  [print(x) for x in sorted(tmp)]
 
-def eg__kpp(k=None):
+def eg__kpp(k):
   k = coerce(k or "64")
   d = Data(csv(the.file))
-  for rows in [d.kpp(k=k), 
+  for rows in [d.kpp(k=k)[0], 
                random.choices(d.rows,k=k)]:
     print(k,adds([d.xdist(*random.choices(rows,k=2)) for _ in range(100)]))
 
+def eg__tree(f):
+  k = 32
+  d = Data(csv(f or the.file))
+  showTree( d.tree(d.kpp(k)[0]))
+
+def showTree(tree):
+  def show(t): return f"{t.txt} {t.test.__doc__} {t.x}" if t else ""
+  def win(t): return 1-(t.ys.mu - tree.ys.lo) / (tree.ys.mu - tree.ys.lo)
+  print("   n      d2h     win")
+  print(" ---     ----     ---")
+  for lvl,node in tree.nodes(key=lambda t:t.ys.mu): 
+    post = "" if node.kids else ";"
+    pre  = f"{len(node.rows):>4}  |  {node.ys.mu:>4.2f}  | {int(100*win(node)):>4}\t   " 
+    print(pre,((lvl - 1) * "|  ") + show(node.test) + post)     
 #------------------------------------------------------------------------------
 the = o(**{m[1]:coerce(m[2]) 
         for m in re.finditer(r"-\w+\s*(\w+).*=\s*(\S+)", __doc__)})
