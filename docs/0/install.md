@@ -37,10 +37,10 @@ Now you need some code and sample data sets
     cd barelogic
     ```
 
-3. Fetch all branches and check out the `v0.5` branch:
+3. Fetch all branches and check out the `v0.6` branch:
     ```
     git fetch origin
-    git checkout -b v0.5 origin/v0.5
+    git checkout -b v0.6 origin/v0.6
     ```
 
 4. Create a new branch for your changes.
