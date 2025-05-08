@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 forgo: active learning for explainable multi-objective optimization
-(c) 2025, Tim Menzies <timm@ieee.org>, MIT License
+(c) 2025, Tim Menzies <timm@ieee.org>, MIT License.
 
 Options:
   -h         show help
