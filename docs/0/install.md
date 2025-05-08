@@ -33,7 +33,7 @@ Now you need some code and sample data sets
 
 2. Clone your fork to your local machine:
     ```
-    git clone https://github.com/YOUR_USERNAME/barelogic.git
+    git clone https://github.com/timm/barelogic.git
     cd barelogic
     ```
 
