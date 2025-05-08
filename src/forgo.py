@@ -317,10 +317,10 @@ def showTree(tree):
   def win(t): return 1-(t.ys.mu - tree.ys.lo) / (tree.ys.mu - tree.ys.lo)
   print("   n      d2h     win")
   print(" ---     ----     ---")
-  for lvl,node in tree.nodes(key=lambda t:t.ys.mu): 
+  for lvl,node in tree.nodes(key=lambda t:t.ys.mu):    #----  
     post = "" if node.kids else ";"
     pre  = f"{len(node.rows):>4}  |  {node.ys.mu:>4.2f}  | {int(100*win(node)):>4}\t   " 
-    print(pre,((lvl - 1) * "|  ") + show(node.test) + post)     
+    print(pre,((lvl - 1) * "|  ") + show(node.test) + post)       #
 #------------------------------------------------------------------------------
 the = o(**{m[1]:coerce(m[2]) 
         for m in re.finditer(r"-\w+\s*(\w+).*=\s*(\S+)", __doc__)})
