@@ -159,6 +159,29 @@ time make trees
 This will run the active learner (with 32 samples), then the tree learner, on all data sets.  On my machine (with 10 coy cores) this takes under a minute.
 The thing to check here is that there are no crashes.
 
+### How good are those trees?
+
+This final test will launch 250 Python processes. So shut down everytime else you are doing before trying this. And it freezes your computer, just do a reboot.
+
+```bash
+cd barelogic/src
+time make aftersReport
+```
+This takes  five minutes to run n my 10 core machine. 
+If it works, then it prints a little report showing how good are the trees learned from 2,30,40,50 samples (selected
+by active learning) at selecting for good examples in the unlabeled space.
+
+```bash
+samples 10 30 50  70  90
+------- -- -- -- --- ---
+     50 67 94 98 100 100
+     40 70 91 97 100 100
+     30 71 89 96 100 100
+     20 72 86 95 100 100
+```
+
+This report says that (say) after 20 samples, these trees select for examples in the unlabeled space that are 95% (median) of the way to optimal. Which is pretty amazing. 
+
 ## Pull requests
 
 If you do something really cool, or if you fix a bug in my code, I will ask you for a pull request
