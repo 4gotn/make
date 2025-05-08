@@ -219,16 +219,6 @@ def csv(file=None):
       if buf and buf[-1] != ",": 
         yield [coerce(x) for x in buf.split(",")]
         buf = ""
-      
-def coerce(x):
-  x = x.strip()
-  if x.lower() == "None"  : return None
-  if x.lower() == "True"  : return True
-  if x.lower() == "False" : return False
-  try: return int(x)
-  except:
-    try: return float(x)
-    except: return x
 
 def adds(src=[], out=None):
   for x in src:
@@ -241,16 +231,28 @@ def values(i,rows):
     x = row[i.at]
     if x != "?": yield x,row
 
+def coerce(x, specials= {'true':1,'True':1, 'false':0, 'False':0, 
+                         'none':None, 'None':None}):
+  try: return int(x)
+  except:
+    try: return float(x)
+    except: 
+      x = x.strip()
+      return specials[x] if x in specials else x
+      
 def cli(d, args):
   "CLI flags for boolean settings need no arg (we just reverse)"
   for c,arg in enumerate(args):
-    for k,v in d.items():
-      v = str(v)
-      if arg == "−"+k[0]:
-        d[k] = coerce("False" if v == "True"  else (
-                      "True"  if v == "False" else (
-                      args[c+1] if c < len(args) - 1 else v)))
-                      
+    if seeking := arg[0]=="-" and len(arg)==2 and arg[1].isalpha():
+      if arg=="-h": continue
+      for k,v in d.items():
+        if arg == "-"+k[0]:  
+          d[k] = coerce("False" if str(v) == "True"  else (
+                        "True"  if str(v) == "False" else (
+                        args[c+1] if c < len(args) - 1 else str(v))))
+          seeking = False 
+      if seeking: print("??",arg,"not in -h,",', '.join("-"+k[0] for k in d))
+                   
 #------------------------------------------------------------------------------
 # too har d   nums
 def select(data, cols, k=16, g=5):
