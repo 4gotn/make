@@ -4,7 +4,7 @@ SHELL=/bin/bash
 
 Here  := $(shell git rev-parse --show-toplevel)
 There := $(Here)/../4gotn.github.io
-Repos := $(Here) $(There)
+Repos := $(Here) $(There) $(Here)/../moot
 
 define every
   $(foreach d,$(Repos), \
