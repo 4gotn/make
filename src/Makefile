@@ -8,8 +8,7 @@
 		--line-numbers=1 \
 		--file-align=fill \
 		--borders=no \
-		--columns=4 \
-		--lines-per-page=150 \
+		--columns=3 \
 		--chars-per-line=80 \
 		--left-title="" \
 		--left-footer="$<" \
@@ -23,3 +22,6 @@ html:
 
 pythonInstall:
 	sudo npm install -g docco
+
+general: ../../moot/optimize/[bchmp]*/*.csv
+	@{ $(foreach d, $^,  python3 -B forgo.py --tree $d;) } | sort -n | fmt

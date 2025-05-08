@@ -142,7 +142,8 @@ class Cols(o):
   def add(i,row): return [c.add(row[c.at]) for c in i.all]
   def sub(i,row): return [c.sub(row[c.at]) for c in i.all]
 
-#------------------------------------------------------------------------------
+
+#------------------------------------------------------------------------------
 class Data(o):
   def __init__(i,src=[]): 
     i.rows,i.cols = [],None
@@ -162,24 +163,31 @@ class Data(o):
       if key not in mem: mem[key] = i.xdist(x,y)
       return mem[key] 
       
-    row, *rows = shuffle(rows or i.rows)[:the.some]
-    out, mem = [row], {}
+    row,  *rows    = shuffle(rows or i.rows)
+    some, rest     = rows[:the.some], rows[the.some:] 
+    centroids, mem = [row], {}
     for _ in range(1, k):
-      dists = [min(D(x, y)**2 for y in out) for x in rows]
+      dists = [min(D(x, y)**2 for y in centroids) for x in some]
       r     = random.random() * sum(dists)
       for j, d in enumerate(dists):
         r -= d
         if r <= 0:
-          out.append(rows.pop(j))
+          centroids.append(some.pop(j))
           break
-    return out, mem
+    return centroids, mem, some + rest
 
   def nodes(i,lvl=0, key=None):
     yield lvl,i
     for kid in (sorted(i.kids, key=key) if key else i.kids):
       for node1 in kid.nodes(lvl+1, key=key):
         yield node1
-     
+
+  def predict(i,row):
+    for kid in i.kids:
+      if selects(row, kid.test): 
+        return kid.predict(row)
+    return i.ys.mid()
+      
   def sub(i, row, purge=True):
     i.cols.sub(row)
     if purge: i.rows.remove(row)
@@ -207,10 +215,10 @@ class Data(o):
     p = the.p
     def fun(c): return abs(c.goal - c.norm(row[c.at]))
     return (sum(fun(c)**p for c in i.cols.y) / len(i.cols.y))**(1/p)
+
+  def ydists(i,rows=[]): return adds(i.ydist(row) for row in rows or i.rows)
   
 #------------------------------------------------------------------------------
-def shuffle(lst): random.shuffle(lst); return lst
-
 def csv(file=None):
   buf = ""
   for line in fileinput.input(file):
@@ -231,8 +239,7 @@ def values(i,rows):
     x = row[i.at]
     if x != "?": yield x,row
 
-def coerce(x, specials= {'true':1,'True':1, 'false':0, 'False':0, 
-                         'none':None, 'None':None}):
+def coerce(x, specials= {'True':1, 'False':0, 'None':None}):
   try: return int(x)
   except:
     try: return float(x)
@@ -255,6 +262,8 @@ def cli(d, args):
                    
 #------------------------------------------------------------------------------
 # too har d   nums
+def shuffle(lst): random.shuffle(lst); return lst
+
 def select(data, cols, k=16, g=5):
   m = len(data[0])
   w = [1] * m
@@ -312,7 +321,12 @@ def eg__kpp(k):
 def eg__tree(f):
   k = 32
   d = Data(csv(f or the.file))
-  showTree( d.tree(d.kpp(k)[0]))
+  ys = d.ydists()
+  def win(row): return int(100*(1 - (d.ydist(row) - ys.lo)/(ys.mu - ys.lo)))
+  d.rows = shuffle(d.rows)
+  some, rest = d.rows[:32], d.rows[32:]
+  t = d.tree(some)
+  print(win(min(rest, key=lambda row: t.predict(row))))
 
 def showTree(tree):
   def show(t): return f"{t.txt} {t.test.__doc__} {t.x}" if t else ""
