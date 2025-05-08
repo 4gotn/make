@@ -147,7 +147,7 @@ Here:
 - `n` is the number of rows in each branch; 
 - `;` denotes a leaf; 
 - `d2h` is the distance of the mean score of the rows in each branch to an optimal zero point (so lower numbers are better)
-- `win` normalizes d2h as `100 - 100 \* int(1 - (d2h-min)/(mu-min))` (so higher numbers are better and 100 is best).
+- `win` normalizes d2h as `100 - 100 * int(1 - (d2h-min)/(mu-min))` (so higher numbers are better and 100 is best).
 
 ### Is your tree learner working, on all data sets?
 
