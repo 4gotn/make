@@ -171,16 +171,28 @@ This takes  five minutes to run n my 10 core machine.
 If it works, then it prints a little report showing how good are the trees learned from 2,30,40,50 samples (selected
 by active learning) at selecting for good examples in the unlabeled space.
 
+In that second round sampling, if you all 20 additional samples then:
+
 ```bash
-samples 10 30 50  70  90
-------- -- -- -- --- ---
-     50 67 94 98 100 100
-     40 70 91 97 100 100
-     30 71 89 96 100 100
-     20 72 86 95 100 100
+samples + additional 10 30 50  70  90
+-------   ---------- -- -- -- --- ---
+     50     20       67 94 98 100 100
+     40     20       70 91 97 100 100
+     30     20       71 89 96 100 100
+     20     20       72 86 95 100 100
+
+    256      1      -14 33 68  78  92
+    128      1       22 56 71  85  97
+     64      1       12 55 70  79  95
+     32      1       15 43 56  76  95
+     16      1      110 31 46  67  89
+      8      1        7 15 28  38  58
 ```
 
-This report says that (say) after 20 samples, these trees select for examples in the unlabeled space that are 95% (median) of the way to optimal. Which is pretty amazing. 
+This report says that (say) after 64 initial
+samples, the 1 more from the tree, these tries select for examples in the unlabeled space that are 70% (median) of the way to optimal. Which is pretty amazing. 
+
+Further, in terms of predicting future labels, there is little win after 64 initial samples.
 
 ## Pull requests
 
