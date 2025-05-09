@@ -8,16 +8,18 @@
 		--line-numbers=1 \
 		--file-align=fill \
 		--borders=no \
-		--columns=4 \
-		--lines-per-page=150 \
-		--chars-per-line=80 \
+		--columns=3 \
 		--left-title="" \
 		--left-footer="$<" \
 		--right-footer="page %s. of %s#" \
 		-Br -M letter -o - \
 	| ps2pdf - $@
 	open $@
-
+# 
+# 
+# 		--lines-per-page=150 \
+# 		--chars-per-line=80 \
+# 		
 html:
 	docco -o ~/tmp forgo.py
 

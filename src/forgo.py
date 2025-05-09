@@ -34,6 +34,52 @@ def say(x):
     return str(less) if x==less else f"{x:.3f}".rstrip("0").rstrip(".")
   return str(x)
 
+"""make cuts an object with its own __repr__
+
+using kernel desnity cuts (the x-value between the means that minismizes abs(pdf(a) - pdf(b)
+)
+import random, math, matplotlib.pyplot as plt
+
+def best_split_pdf(a, b):
+    data = sorted(a + b)
+    bins = math.ceil(math.sqrt(len(data)))
+    lo, hi = data[0], data[-1]
+    width = (hi - lo) / bins
+    mids = [lo + (i + 0.5) * width for i in range(bins)]
+    mean_a, mean_b = sum(a)/len(a), sum(b)/len(b)
+
+    def pdf_and_var(xs):
+        h, n, mu = [0]*bins, len(xs), sum(xs)/len(xs)
+        for x in xs:
+            h[min(int((x - lo) / width), bins - 1)] += 1
+        pdf = [h[i]/n for i in range(bins)]
+        var = sum((x - mu)**2 for x in xs) / n
+        return pdf, var
+
+    pdfa, vara = pdf_and_var(a)
+    pdfb, varb = pdf_and_var(b)
+
+    best = min(
+        [m for m in mids if min(mean_a, mean_b) <= m <= max(mean_a, mean_b)],
+        key=lambda m: abs(pdfa[mids.index(m)] - pdfb[mids.index(m)])
+    )
+    weighted_var = (len(a)*vara + len(b)*varb) / (len(a)+len(b))
+
+    plt.plot(mids, pdfa, label="PDF A", marker="o")
+    plt.plot(mids, pdfb, label="PDF B", marker="s")
+    plt.axvline(best, color="red", linestyle="--", label=f"Split ≈ {best:.2f}")
+    plt.legend(); plt.title("PDFs and Split"); plt.grid(); plt.tight_layout(); plt.show()
+
+    return best, weighted_var
+
+# Example usage
+random.seed(1)
+a = [random.gauss(3, 1) for _ in range(100)]
+b = [random.gauss(7, 1) for _ in range(100)]
+split, wvar = best_split_pdf(a, b)
+print(f"Best split: {split:.2f}, Weighted post-split variance: {wvar:.2f}")
+
+"""
 def eq(v,x): 
   "="
   return v == x
