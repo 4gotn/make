@@ -40,33 +40,30 @@ using kernel desnity cuts (the x-value between the means that minismizes abs(pdf
 )
 import random, math, matplotlib.pyplot as plt
 
-def best_split_pdf(a, b):
-    data = sorted(a + b)
-    bins = math.ceil(math.sqrt(len(data)))
-    lo, hi = data[0], data[-1]
-    width = (hi - lo) / bins
-    mids = [lo + (i + 0.5) * width for i in range(bins)]
-    mean_a, mean_b = sum(a)/len(a), sum(b)/len(b)
+??? what arre the y values
+def best_split_pdf(a, b,lo,hi):
+  def pdf_sd(xs):
+    h, n, mu = [0]*bins, len(xs), sum(xs)/len(xs)
+    for x in xs:
+      h[min(int((x - lo) / width), bins - 1)] += 1
+    pdf = [h[i]/n for i in range(bins)]
+    return pdf, (sum((x - mu)**2 for x in xs) / (n-1))**.5
+        
+  data    = sorted(a + b)
+  bins    = math.ceil(math.sqrt(len(data)))
+  lo, hi  = lo or data[0], hi or data[-1]
+  width   = (hi - lo) / bins
+  mids    = [lo + (i + 0.5) * width for i in range(bins)]
+  mua,mub = sum(a)/len(a), sum(b)/len(b)
+  pa,sda  = pdf_sd(a)
+  pb,sdb  = pdf_sd(b)
+  best    = min([m for m in mids if min(mua, mub) <= m <= max(mua, mub)],
+                key=lambda m: abs(pa[mids.index(m)] - pb[mids.index(m)]))        
+  return o(var=  (len(a)*sda + len(b)*sdb) / len(data),
+           decisions = o()_
 
-    def pdf_and_var(xs):
-        h, n, mu = [0]*bins, len(xs), sum(xs)/len(xs)
-        for x in xs:
-            h[min(int((x - lo) / width), bins - 1)] += 1
-        pdf = [h[i]/n for i in range(bins)]
-        var = sum((x - mu)**2 for x in xs) / n
-        return pdf, var
-
-    pdfa, vara = pdf_and_var(a)
-    pdfb, varb = pdf_and_var(b)
-
-    best = min(
-        [m for m in mids if min(mean_a, mean_b) <= m <= max(mean_a, mean_b)],
-        key=lambda m: abs(pdfa[mids.index(m)] - pdfb[mids.index(m)])
-    )
-    weighted_var = (len(a)*vara + len(b)*varb) / (len(a)+len(b))
-
-    plt.plot(mids, pdfa, label="PDF A", marker="o")
-    plt.plot(mids, pdfb, label="PDF B", marker="s")
+    plt.plot(mids, pa, label="PDF A", marker="o")
+    plt.plot(mids, pb, label="PDF B", marker="s")
     plt.axvline(best, color="red", linestyle="--", label=f"Split ≈ {best:.2f}")
     plt.legend(); plt.title("PDFs and Split"); plt.grid(); plt.tight_layout(); plt.show()
 
