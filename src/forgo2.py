@@ -6,11 +6,11 @@ forgo: active learning for explainable multi-objective optimization
 
 Options:
   -h         show help
-  -b bins    number of bins = 10
-  -f file    csv data file = ../../moot/optimize/misc/auto93.csv
+  -b bins    number of bins                 = 10
   -s some    sub-samples used for distances = 128
   -l leaf    min number leaves per tree     = 2
   -r rseed   random number seed             = 1234567890
+  -f file    csv data file = ../../moot/optimize/misc/auto93.csv
 
 Demos: 
   --the      show settings
