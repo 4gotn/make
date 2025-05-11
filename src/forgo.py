@@ -277,11 +277,6 @@ def adds(src=[], out=None):
     out.add(x)
   return out
 
-def values(i,rows):
-  for row in rows:
-    x = row[i.at]
-    if x != "?": yield x,row
-
 def coerce(x, specials= {'True':1, 'False':0, 'None':None}):
   try: return int(x)
   except:

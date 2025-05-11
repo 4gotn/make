@@ -1,9 +1,9 @@
 -include ../Makefile
 
 ~/tmp/%.pdf: %.py  ## make doco: .py ==> .pdf using a2ps | ps2pdf
-	mkdir -p ~/tmp
-	echo "Generating $@ ..."
-	a2ps $< \
+	@mkdir -p ~/tmp
+	@echo "Generating $@ ..."
+	@a2ps $< \
 		--pro=color \
 		--line-numbers=1 \
 		--file-align=fill \
@@ -14,12 +14,12 @@
 		--right-footer="page %s. of %s#" \
 		-Br -M letter -o - \
 	| ps2pdf - $@
-	open $@
+	@open $@
 # 		--lines-per-page=150 \
 # 		--chars-per-line=80 \
 
-html:
-	docco -o ~/tmp forgo.py
+~/tmp/%.html: %.py
+	@docco -o ~/tmp $^; open $@ 
 
 pythonInstall:
 	sudo npm install -g docco
