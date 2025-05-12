@@ -7,86 +7,112 @@ forgo: active learning for explainable multi-objective optimization
 Options:
   -h         show help
   -b bins    number of bins                 = 10
-  -s some    sub-samples used for distances = 128
-  -l leaf    min number leaves per tree     = 2
-  -r rseed   random number seed             = 1234567890
   -f file    csv data file = ../../moot/optimize/misc/auto93.csv
-
-Demos: 
-  --the      show settings
-  --csv      show csv reader
-  --cols     show col generation
-  --data     show columns after reading data
-  --subs     show we can incrementally add/delete rows
-  --kpp      show kmeans++ centroids
+  -k k       low frequency Bayes hack       = 1  
+  -l leaf    min number leaves per tree     = 2
+  -m m       low frequency Bayes hack       = 2  
+  -r rseed   random number seed             = 1234567890
+  -s some    sub-samples used for distances = 128
 """
 import fileinput, random, sys, re
+from collections import defaultdict
+
 sys.dont_write_bytecode = True
 BIG = 1E32
 
-the = {'big': 1E32, 'bins': 10, 'p': 2}
-b4 = {k: k for k in ENV}
+#------------------------------------------------------------------------------
+class o: 
+  __init__ = lambda i,**d : i.__dict__.update(**d)
+  __repr__ = lambda i     : i.__class__.__name__ + '('+str(i.__dict__)+')'
 
+#------------------------------------------------------------------------------
 class Data:
-  def __init__(i, names):
-    i.names = names
-    i.hi, i.lo, i.goal, i.f = {}, {}, {}, {}
-    for c, txt in names.items():
-      i.f[c] = {b: {0: 0, 1: 1} for b in range(1, the['bins'] + 1)}
-      if txt[0].isupper():
-        i.hi[c], i.lo[c] = -the['big'], the['big']
-        if txt[-1] in "+-":
-          i.goal[c] = 0 if txt.endswith('-') else 1
-    i.rows = []
-  
+  def __init__(i, names, rows=[]):
+    """Numeric columns have `lo` and `hi`. Y-values have `goal`.
+    `f` is where we store frequencies f[col][bin]."""
+    i.names, i.hi, i.lo, i.goal, i.rows = names, {}, {}, {}, []
+    i.f = lambda: defaultdict(lambda: defaultdict(int))
+    for c,s in enumerate(names):
+      if s[0].isupper():
+        i.hi[c], i.lo[c] = -BIG, BIG
+        if s[-1] in "+-":
+          i.goal[c] = 0 if s[-1]=='-' else 1
+    i.adds(rows)
+ 
+  def clone(i, rows=[]): return Data(i.names, rows)
+
+  def adds(i,rows=[]): 
+    "Add multiple rows, update the frequency counts."
+    [i.add(row) for row in rows]
+    i.counts()
+
   def add(i, row):
-    i.rows.append(row)
+    "Add one rows, update the lo and hi knowledge."
+    i.rows += [row]
+    i.bins += [row[:]]
     for c in i.hi:
       x = row[c]
-      i.hi[c] = max(i.hi[c], x)
-      i.lo[c] = min(i.lo[c], x)
+      if x != "?":
+        row[c]  = x = float(x)
+        i.lo[c] = min(i.lo[c], x)
+        i.hi[c] = max(i.hi[c], x)
+    return i
 
-def threes(d):
-    n = len(d.rows)
-    d.rows.sort(key=lambda r1: ydist(r1, d))
-    for r in range(n):
-        kl = r < int(n ** 0.5)
-        for c in range(len(d.rows[r])):
-            x = bin(c, d.rows[r][c])
-            F[c][x][kl] = F[c].get(x, {}).get(kl, 0) + 1
+  def counts(i):
+    "Fill in the bins and the frequency counts."
+    for rows in i.rows:
+      for c,x in enumerate(i.rows):
+        if x != "?" and c not in i.goal:
+          i.f[c][ i.bin(c,x) ] += 1
 
-def ydist(row, d):
-    total = sum(abs(norm(c, v) - d.goal[c])**the['p'] for c, v in row.items())
-    return (total / len(d.goal))**(1 / the['p'])
+  def like(i, row, nh, nall):
+    def fun(c,b):
+      return (i.f[c][b] + the.m*prior) / (len(i.rows) + the.m + 1/BIG)
+    prior = (len(i.rows) + the.k) / (nall + the.k*nh)
+    tmp   = [fun(c, i.bin(c,x)) for c,x in enumerate(row) 
+             if x != "?" and c not in goal]
+    return sum(math.log(n) for n in tmp + [prior] if n>0)
 
-def coerce(x): return float(x) if x.isdigit() else trim(x)
+  def ydist(i,row):
+    n = sum(abs(i.norm(c, row[c]) - g) ** the.p for c,g in i.goals.items())
+    return (n / len(d.goal)) ** (1 / the.p)
 
-def trim(s): return s.strip()
+  def rorder(i):
+    rows.sort(key=lambda r: i.ydist(r))
+    return i
 
-def bin(c, x):
-  if x=="?" or c not in in d.hi:
-        if x == "?": return x
-        return (x - d.lo[c]) / (d.hi[c] - d.lo[c] + 1 / the['big'])
-    return x
+  def norm(i,c,x):
+    if x=="?" or c not in hi: return x
+    return (x - i.lo[c]) / (i.hi[c] - i.lo[c] + 1/BIG)
 
-#-----------------------------------------------------------------------------
-def show(v):
-  "Return pretty print float strings (everything else as a string)."
-  if type(v) == float:
-    w = v // 1
-    v = w if v==w else f"{v:.3f}".rstrip("0").rstrip(".")
-  return str(v)
+  def bin(i,c,x):
+    if x=="?" or c not in hi: return x
+    return min(the.bin - 1, int(i.norm(c,x)*the.bin))
 
-def coerce(x):
-  try: return int(x)
-  except:
-    try: return float(x)
-    except: return x.strip()
+#------------------------------------------------------------------------------
+def actLearn(d):
+  random.shuffle(d.rows)
+  n    = the.start
+  m    = round(n**the.guess)
+  done = d.clone(d.rows[:n]).rorder()
+  todo = d.rows[n:]
+  best = d.clone(done.rows[:m])
+  rest = d.clone(done.rows[m:])
+  while len(todo) > 2 and m < the.Stop:
+    n += 1
+    hi, *lo = sorted(todo[:the.Few], key=_guess, reverse=True)
+    todo = lo + todo[the.Few:]
+    best.add(hi)
+    br.add(hi)
+    if len(best.rows) >= round(n**the.guess):
+      rest.add( best.sub( best.rorder().rows.pop(-1)))
+  return o(best=best, rest=rest, todo=todo)
 
+#------------------------------------------------------------------------------
 def csv(file=None):
   for line in fileinput.input(file):
     if line := line.split("#")[0].replace(" ", "").strip():
-      yield [coerce(x) for x in line.split(",")]
+      yield [x for x in line.split(",")]
 
 def cli(d, args):
   for c,arg in enumerate(args):
@@ -94,15 +120,14 @@ def cli(d, args):
       if arg == "-"+k[0]:  
         d[k] = coerce(args[c+1] if c < len(args) - 1 else str(v))
 
-#-----------------------------------------------------------------------------
-# convert doc string to "the" settings 
+#------------------------------------------------------------------------------
+def eg_h(_): print(__doc__)
+def eg__the(_): print(the)
+
+#------------------------------------------------------------------------------
 the = o(**{m[1]:coerce(m[2]) 
         for m in re.finditer(r"-\w+\s*(\w+).*=\s*(\S+)", __doc__)})
 
-#-----------------------------------------------------------------------------
-def eg_h(_): print(__doc__)
-def eg__the(_): print(the)
-#-----------------------------------------------------------------------------
 if __name__ == "__main__":
   cli(the.__dict__, sys.argv) # update 'the' from the command line
   for n,s in enumerate(sys.argv):
