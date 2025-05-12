@@ -4,4 +4,5 @@
   - [About the Author](0/author.md)
   - [Easier AI](0/active.md)
   - [Install](0/install.md)
+- [1 : A Quick Tour](1/overview.md)
 - [References](./refs.md)

@@ -24,60 +24,50 @@ import fileinput, random, sys, re
 sys.dont_write_bytecode = True
 BIG = 1E32
 
-#-----------------------------------------------------------------------------
-class o: 
-  "Simple structs (with named fields) that can print themselves."
-  __init__ = lambda i,**d: i.__dict__.update(**d)
-  __repr__ = lambda i: i.__class__.__name__ + '(' + ' '.join(
-                       [f':{k} show(v)' for k,v in i.__dict__.items()])+')'
+the = {'big': 1E32, 'bins': 10, 'p': 2}
+b4 = {k: k for k in ENV}
 
-class Test(o):
-  "Tests have text, operators and values."
-  def __init__(i,col,op, val):
-     i.txt, i.at, i.op, i.val, i.test = col.txt, col.at, op, val
-     
-  def __repr__(i): return f"{i.txt} {i.op} {i.val}" 
-  def selects(row):
-    v,w = row[i.at], i.val
-    return v=="?" or v==w if i.op=="=" else (v<=w if i.op==">" else v>= w)
+class Data:
+  def __init__(i, names):
+    i.names = names
+    i.hi, i.lo, i.goal, i.f = {}, {}, {}, {}
+    for c, txt in names.items():
+      i.f[c] = {b: {0: 0, 1: 1} for b in range(1, the['bins'] + 1)}
+      if txt[0].isupper():
+        i.hi[c], i.lo[c] = -the['big'], the['big']
+        if txt[-1] in "+-":
+          i.goal[c] = 0 if txt.endswith('-') else 1
+    i.rows = []
+  
+  def add(i, row):
+    i.rows.append(row)
+    for c in i.hi:
+      x = row[c]
+      i.hi[c] = max(i.hi[c], x)
+      i.lo[c] = min(i.lo[c], x)
 
-class Row(o):
-  def __init__(i, a,bins=[]): i.cells, i.bins = a,bins
-    
-def bins(src):
-  cols = None
-  for row in src:
-    if not head: cols=Cols(row)
-    else: yield Row(row,[c.bin(c.has(row)) for c in cols.all]), cols 
+def threes(d):
+    n = len(d.rows)
+    d.rows.sort(key=lambda r1: ydist(r1, d))
+    for r in range(n):
+        kl = r < int(n ** 0.5)
+        for c in range(len(d.rows[r])):
+            x = bin(c, d.rows[r][c])
+            F[c][x][kl] = F[c].get(x, {}).get(kl, 0) + 1
 
-class Col(o):
-  def __init__(i,txt=' ',at=0):
-    i.txt, i.at, i.n = txt, at, 0
+def ydist(row, d):
+    total = sum(abs(norm(c, v) - d.goal[c])**the['p'] for c, v in row.items())
+    return (total / len(d.goal))**(1 / the['p'])
 
-  def add(i,x,n=1, flip=1): 
-    if x != "?": i.n += flip*n; i.add1(x,n,flip)
+def coerce(x): return float(x) if x.isdigit() else trim(x)
+
+def trim(s): return s.strip()
+
+def bin(c, x):
+  if x=="?" or c not in in d.hi:
+        if x == "?": return x
+        return (x - d.lo[c]) / (d.hi[c] - d.lo[c] + 1 / the['big'])
     return x
-    
-  def has(i,row): return row[i.at]
-
-class Num(o):
-  def __init__(i,**_): 
-    super().__init__(**_)
-    i.lo, i.hi = BIG, -BIG
-  def add1(i,x, *_):
-    i.lo = min(x, i.lo)
-    i.hi = max(x, i.hi)
-    
-  def norm(i,x): return x if x=="?" else (x - i.lo) / (i.hi - i.lo)
-  def bin(i,x) : return min(int(i.norm(x)*the.bins), the.bins - 1)
-
-class Sym(o): 
-  def __init__(i,**_): 
-    super().__init__(**_)
-    i.has = {} 
-  def add1(i,x,n=1,flip=1):
-    i.has[x] = flip*n + (has[x] if x in has else 0)
-  def bin(i,x): return x
 
 #-----------------------------------------------------------------------------
 def show(v):
@@ -87,28 +77,18 @@ def show(v):
     v = w if v==w else f"{v:.3f}".rstrip("0").rstrip(".")
   return str(v)
 
-def coerce(x, specials= {'True':1, 'False':0, 'None':None}):
-  "Coerce a string to an atom."
+def coerce(x):
   try: return int(x)
   except:
     try: return float(x)
-    except: 
-      x = x.strip()
-      return specials[x] if x in specials else x
+    except: return x.strip()
 
 def csv(file=None):
-  "Read csv rows after killing comments and spaces, join lines ending in ','"
-  buf = ""
   for line in fileinput.input(file):
     if line := line.split("#")[0].replace(" ", "").strip():
-      buf += line
-      if buf and buf[-1] != ",": 
-        yield [coerce(x) for x in buf.split(",")]
-        buf = ""
-  return out
+      yield [coerce(x) for x in line.split(",")]
 
 def cli(d, args):
-  "Update a dictionary 'slot' if there is a CLI flag -s Val"
   for c,arg in enumerate(args):
     for k,v in d.items():
       if arg == "-"+k[0]:  
