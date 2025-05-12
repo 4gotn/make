@@ -27,17 +27,14 @@ class o:
 def show(d):
   return str({k: (f"{v:3g}" if type(v)==float else v) for k,v in d.items()})
 
+ # in this code, when possible, i=self, c=column index, r=row
 #------------------------------------------------------------------------------
 class Num(o):
   def __init__(i, has=[], txt=" "): 
-    i.txt=txt
+    i.txt = txt
     i.sd = i.m2 = i.mu = i.n = 0
     [i.add(x) for x in has]
   
-  def bin(i,x) : return min(the.bins-1, int(i.cdf(x)*the.bin))
-  def norm(i,x): return (x - i.lo) / (i.hi - i.lo + 1/BIG)
-  def sub(i,x) : return i.add(x,-1)
-
   def add(i,x,inc=1):
     i.n += inc
     i.lo = min(v, i.lo)
@@ -51,10 +48,16 @@ class Num(o):
       i.sd  = 0 if i.n <=2  else (max(0,i.m2)/(i.n-1))**.5
     return x
 
+  def bin(i,x) : return min(the.bins-1, int(i.cdf(x)*the.bin))
+
   def cdf(i,x):
     def fun(z): return 1 - 0.5 * math.exp(-0.717 * z - 0.416 * z * z) 
     z = (x - i.mu) / i.sd
     return  z>=0 and fun(z) or 1 - fun(-z) end
+
+  def norm(i,x): return (x - i.lo) / (i.hi - i.lo + 1/BIG)
+
+  def sub(i,x) : return i.add(x,-1)
 
 class Data(o):
   def __init__(i, rows):
@@ -62,6 +65,21 @@ class Data(o):
     i.names, i.nums, i.goals, i.rows = next(rows), {}, {}, []
     i.header()
     [i.add(row) for row in rows]
+
+  def add(i, row, inc=1, purge=False):
+    "Add one row, update the num knowledge."
+    i.f = None
+    for c,n in i.nums.items():
+      x = row[c]
+      if x != "?":
+        row[c] = n.add(float(x),inc)
+    if inc==1 : i.rows.append(row)w
+    elif purge: i.rows.remove(row) # disabled by default sice remove is slow
+    return row
+
+  def bin(i,c,x): return i.nums[c].bins(c) if c in i.nums else x
+
+  def clone(i,rows=[]): return Data([i.names] + rows)
 
   def header(i):
     i.f = None
@@ -71,17 +89,13 @@ class Data(o):
         if s[-1] in "+-":
           i.goals[c] = 0 if s[-1]=='-' else 1
 
-  def clone(i, rows=[]): return Data([i.names] + rows)
-
-  def add(i, row):
-    "Add one row, update the num knowledge."
-    for c,n in i.nums.items():
-      x = row[c]
-      if x != "?":
-        row[c] = n.add(float(x))
-    i.rows += [row]
-    i.f = None
-    return row
+  # need to be able to talk to a global space of discretization
+  def like(i, row, f, nh, nall):
+    _like = lambda c,b: (f[c][b] + the.m*prior) / (len(i.rows) + the.m + 1/BIG)
+    prior = (len(i.rows) + the.k) / (nall + the.k*nh)
+    tmp   = [_like(c, i.bin(c,x)) for c,x in enumerate(row) 
+             if x != "?" and c not in goals]
+    return sum(math.log(n) for n in tmp + [prior] if n>0)
 
   def ok(i):
     "Fill in the bins and the frequency counts."
@@ -93,25 +107,14 @@ class Data(o):
             i.f[c][ i.bin(c,x) ] += 1
     return i
 
-  def like(i, row, nh, nall):
-    def like1(c,b):
-      return (f[c][b] + the.m*prior) / (len(i.rows) + the.m + 1/BIG)
+  def sort(i,rows=None): 
+    (rows or i.rows).sort(key=lambda row: i.ydist(row)); return i
 
-    f     = i.ok().f
-    prior = (len(i.rows) + the.k) / (nall + the.k*nh)
-    tmp   = [like1(c, i.bin(c,x)) for c,x in enumerate(row) 
-             if x != "?" and c not in goals]
-    return sum(math.log(n) for n in tmp + [prior] if n>0)
+  def sub(i,row, purge=False): i.add(row,-1,purge)
 
   def ydist(i,row):
     n= sum(abs(i.nums[c].norm(row[c]) - g) ** the.p for c,g in i.goals.items())
     return (n / len(d.goals)) ** (1 / the.p)
-
-  def sort(i):
-    rows.sort(key=lambda row: i.ydist(row))
-    return i
-
-  def bin(i,c,x): return i.nums[c].bins(c) if c in i.nums else x
 
 #------------------------------------------------------------------------------
 def actLearn(d):
@@ -124,8 +127,7 @@ def actLearn(d):
   rest = d.clone(labeled.rows[m:])
   while len(todo) > 2 and m < the.Stop:
     n += 1
-    hi, *lo = sorted(todo[:the.Few], key=_guess, reverse=True)
-    todo = lo + todo[the.Few:]
+    hi, *todo = sorted(todo[:the.Few], key=aq, reverse=True) + todo[the.Few:]
     best.add(hi)
     br.add(hi)
     if len(best.rows) >= round(n**the.guess):
