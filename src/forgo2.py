@@ -21,72 +21,81 @@ sys.dont_write_bytecode = True
 BIG = 1E32
 
 class o: 
-  __init__ = lambda i, **d: i.__dict__.update(d)
-  __repr__ = lambda i: return i.__class__.__name__+'('+show(i.__dict__)+')'
+  __init__ = lambda i,**d: i.__dict__.update(d)
+  __repr__ = lambda     i: i.__class__.__name__+'(f{say(i.__dict__)}))'
 
-def show(d):
-  return str({k: (f"{v:3g}" if type(v)==float else v) for k,v in d.items()})
+def say(d): 
+  return {k: (f"{v:3g}" if type(v)==float else v) for k,v in d.items()}
 
- # in this code, when possible, i=self, c=column index, r=row
+# in this code, when possible, i=self, c=column index, r=row.
 #------------------------------------------------------------------------------
-class Num(o):
-  def __init__(i, has=[], txt=" "): 
-    i.txt = txt
-    i.sd = i.m2 = i.mu = i.n = 0
+class Sym(o):
+  def __init__(i, has=[], txt=" ", at=0): 
+    i.txt, i.at, i.n, i.has = txt, at, 0, {}
     [i.add(x) for x in has]
   
-  def add(i,x,inc=1):
-    i.n += inc
-    i.lo = min(v, i.lo)
-    i.hi = max(v, i.hi)
-    if inc < 0 and i.n < 2: 
-      i.n = i.mu = i.m2 = i.sd = 0
-    else:
-      d = i.mu - x
-      i.mu += inc * d/i.n
-      i.m2 += inc * d * (x - i.mu)
-      i.sd  = 0 if i.n <=2  else (max(0,i.m2)/(i.n-1))**.5
+  def add(i, x, inc=1):
+    if x !="?":
+      i.n += inc
+      i.has[x] = (i.has[x] if x in i.has else 0) + inc
     return x
 
-  def bin(i,x) : return min(the.bins-1, int(i.cdf(x)*the.bin))
+  def bin(i,x): return x
+    
+class Num(o):
+  def __init__(i, has=[], txt=" ", at=0): 
+    i.txt, i.at, i.n = txt, at, 0
+    i.sd, i.m2, i.mu, i.goal = 0, 0, 0, 0 if txt[-1]=="-" else 1
+    [i.add(x) for x in has]
+  
+  def add(i, x, inc=1):
+    if x != "?": 
+      i.n += inc
+      i.lo = min(v, i.lo)
+      i.hi = max(v, i.hi)
+      if inc < 0 and i.n < 2: 
+        i.n = i.mu = i.m2 = i.sd = 0
+      else:
+        d = i.mu - x
+        i.mu += inc * d/i.n
+        i.m2 += inc * d * (x - i.mu)
+        i.sd  = 0 if i.n <=2  else (max(0,i.m2)/(i.n-1))**.5
+    return x
+
+  def bin(i,x): return min(the.bins-1, int(i.cdf(x)*the.bin))
 
   def cdf(i,x):
     def fun(z): return 1 - 0.5 * math.exp(-0.717 * z - 0.416 * z * z) 
     z = (x - i.mu) / i.sd
-    return  z>=0 and fun(z) or 1 - fun(-z) end
+    return  fun(z) if z>=0 else 1 - fun(-z)
 
   def norm(i,x): return (x - i.lo) / (i.hi - i.lo + 1/BIG)
 
-  def sub(i,x) : return i.add(x,-1)
-
-class Meta(o):
+class Cols(o):
   def __init__(i,names):
-    i.names, i.nums, i.goals, i.n = names, {}, {}, 0
+    i.names, i.all, i.x, i.y, i.klass = names, {}, {}, {}, None
     for c,s in enumerate(i.names):
-      if s[0].isupper():
-        i.nums[c] = Num() # hi lo
-        if s[-1] in "+-":
-           i.goals[c] = 0 if s[-1]=='-' else 1
+      col = (Num if s[0].isupper() else Sym)(txt=s, at=c)
+      if s[-1] != "X":
+        if s[-1] == "!": i.klass = col
+        (i.y if s[-1] in "+-!" else i.x).append(col)
 
-  def sub(i,row): return i.sub(row,-1)
-  
-  def add(i, row, inc=1):
-    for c,n in i.nums.items():
-      x = row[c]
-      if x != "?":
-         row[c] = n.add(float(x),inc)
-    return row
-  
+  def add(i, row, inc=1): [c.add(row[c.at], inc) for col in i.all]
+      
 class Data(o): 
-  def __init__(i, rows=[],base=None): 
-    rows = iter(rows)
-    if not base:
-     
-    [i.add(row) for row in rows]
+  def __init__(i, src=[]):
+    i.rows, i.cols, i.f = [], None, None
+    [i.add(row) for row in src]
 
-    if inc==1 : i.rows.append(row)
-    elif purge: i.rows.remove(row) # di
-  
+  def add(i,row, inc=1, purge=False):
+    i.f = None
+    if not i.cols: i.cols = Cols(row)
+    else:
+      if purge: i.rows.remove(row)
+      i.cols.add(row, i, inc)
+    return row
+    
+  def clone(i,rows=[]): return Data([i.cols.names]+rows)  
 
   def bin(i,c,x): 
     z = Data.zero
@@ -94,20 +103,19 @@ class Data(o):
 
   def clone(i,rows=[]): return Data([i.names] + rows)
 
-  def ok(i):
+  def ok(i, rows=[]):
     if not i.f:
       i.f = lambda: defaultdict(lambda: defaultdict(int))
-      for row in rows or rows:
+      for row in rows or i.rows:
         for c,x in enumerate(row):
           if x != "?": 
             i.f[c][ i.bin(c,x) ] += 1 
     return i
     
-  def like(i,  row, nh, nall):
-    _like = lambda c,b: (i.f[c][b] + the.m*prior) / (len(i.rows) + the.m + 1/BIG)
+  def like(i,  row, f, nh, nall):
+    def _like(c,b): return (f[c][b]+the.m*prior) / (len(i.rows)+the.m+1/BIG)
     prior = (len(i.rows) + the.k) / (nall + the.k*nh)
-    tmp   = [_like(c, i.bin(c,x)) for c,x in enumerate(row) 
-             if x != "?" and c not in goals]
+    tmp   = [_like(c, c.bin(x)) for c in i.cols.x if x != "?"]
     return sum(math.log(n) for n in tmp + [prior] if n>0)
     
   def sort(i, rows=None): 
