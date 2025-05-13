@@ -1,125 +1,88 @@
-# The Great Secret
+# Just Enough Data
+
+<img src="../img/jewel.png" align=right width=300>
+
+Ready for a perspective that might change how you see data?
+
+> Menzies's 4th Law: For Software Engineering (SE), the best thing to do with most data is to throw it away.
+
+(Now, I'm talking about tasks like regression, classification, and optimization. Those fancy generative AI models that write poems or paint pictures? They do seem to gobble up billions of data points, fair enough.)
+
+For many common problems, if you give me a data table, I'm telling you: chopping out rows and columns often makes your models better. Sounds nuts, right?
+But many AI gurus have found that a tiny set of 'key' variables calls the shots for the rest of the model. Nail these keys, and controlling the whole shebang becomes a walk in the park.
+
+This isn't some new fad. These "keys" have been popping up in AI for ages, wearing different disguises: principal components, variable subset selection, narrows, master variables, and backdoors.
+
+In 1895,  the Italian economist Vilfredo Pareto
+coined his famous Pareto Principle when he said 80% of the effects come from 20% of the causes. 
+This result pops up everywhere: e.g.
+80% of software bugs might come from 20% of modules, 80% of sales from 20% of clients., etc,
+
+(Actually, it often feels even more extreme. I often  do not see 80:20 but more like
+1000:1 since, in my experiences,  a tiny fraction of factors dictates almost everything.)
 
 
+<img align=right width=200 src="../img/pca.png">
+
+Moving forward now to 1902, Pearson noticed that even in datasets with many dimensions, a handful of principal components captured the main "drift" of the data. 
+For example, in the data shown at right, simply looking left-to-right or up-to-down (along the original axes) might not capture the overall direction or main variation in the data. 
+Instead, Pearson's PCA (principal component analysis)
+finds a new, synthesized dimension. This single synthesized dimension (see the big arrow, at right) is often the best way to model the data's primary structure
+
+Pearson's math for PCA might make your eyes glaze over, but the core idea is pretty simple.
+If you want to see the "direction" of your data rows:
+
+- Figure out a way to measure the distance between rows[^1].
+- Draw a line between two rows that are super far apart, let's call them A and B.
+- Draw a second line at a right angle to that first one.
+- Plot every other data point based on where it lands relative to these two lines[^2].
+
+[^1]: According to David Aha, the distance between two points A,B is \\(\sum_i(D(A_i,B_i)^2)^{0.5}\\)
+ (calculated over all the independent x columns). For symbolic columns, 
+ \\(D(x,y) = x!=y\\).
+For numerics, \\(D(x,y)=abs(x′−y′)\\)
+ where _x'_ is x normalized 0..1 min..max. For missing values, assume maximum distances. For example, if 
+ _x,y_ are both missing, then D=1. If one is missing then we make the assumption that maximizes the distance; e.g.:
+ _x=x if x!="?" else (1 if y<0.5 else 0)_
 
 
-Let me introduce you to Menzies's forth law:
+[^2]: Let _A,B_ be <img align=right width=100 src="../img/triangle.png">  two distance points,
+separated by distance _c_. Let a point P have  a distance _a,b_ to the points _A,B_.
+The cosine rule says _P_ has  an _x_ position
+\\(x=\frac{a^2 + c^c - b^2}{2c}\\) and Pythagoras says _P_ has a _y_ position of \\(y=(a^2-x^2)^{0.5}\\).
 
-> Menzies's 4th Law: For SE, the best thing to do with most data is to throw it away. 
+<img align=right width=200 src="../img/fastmap.png">
 
+Check out this analysis on a spreadsheet with 20 columns and 800 rows describing software classes (think "lines of code," "number of unique symbols," etc.). The red dots are code with known bugs. 
 
+Now imagine yourself trying to understand the raw data (800 rows, 20 numbers). All you might see is a  jumbled mess. 
+But after this trick, everything lines up like soldiers on parade, with the bad-boy defective codes clearly visible on the right.
 
-(Here I am I am talking about regression, classification and optimization problems. 
-Generative tasks may require models with billions of variables learned from 100s of gigabytes of data.)
+The lesson is crystal clear: problems, and the data they spit out, often have a simpler, hidden structure. And you can use this simplicity to your advantage.
 
-Give a table of data, pruning rows and columns results in better
-models. 
-Numerous AI researchers 
-report the existence of a small number of 
-_key_ variables that
-determine the behavior of the rest of the model. When
-such keys are present, then the problem of controlling an
-entire model simplifies to just the problem of controlling
-the keys.
+For instance:
 
-Keys have been discovered in AI many times and called
-many different names such as  _principle components, variable subset selection, narrows,
-master variables, and backdoors_. 
+- Amarel's Narrows (1960s): Back in the '60s, Amarel spotted "narrows" in search problems – tiny sets of essential variable settings. Miss these, and you're lost [11]. His trick? Create "macros" to jump between these narrows, like secret passages in a maze, speeding up the search big time.
 
-<img align=right src="../img/pca.png">
+- Kohavi & John's Variable Pruning (1990s): Fast forward to the '90s, Kohavi and John showed you could chuck out up to 80% of variables in some datasets and still get great classification accuracy [13]. Sound familiar? It's Amarel's idea again: focus on the VIP variables, not the whole crowd.
 
-As far back as 1902, Pearson reported that underlying data sets with many dimensions
-were a handful of _princple componets_ that capture the overall direction of the data.
-Pearson's formalism is heavily mathematical but we can see his effect in an intuative way as follows.
-To capture the "direction" of data:
+- Crawford & Baker's ISAMP (1990s): Around the same time, constraint satisfaction folks found that "random search with retries" was surprisingly effective. Crawford and Baker's ISAMP tool would randomly poke around a model until it hit a dead end [12]. Instead of fussing, ISAMP would just note where it got stuck, hit reset, and try a different random path. Why did this wacky method work? They figured models have a few "master variables" (our keys!) pulling the strings. Trying to check every setting is a waste of time if only a few matter. If you're stuck, don't tiptoe – jump to a whole new area.
 
-- Draw one line between two distant points _A,B_ 
-- Draw a second
-line at right-angles to that first line.
-- Draw every other point at the _x,y_ position where it falls  [^xy].
+- Williams et al.'s Backdoors: Williams and his colleagues found that if you run a random search enough times, the same few variable settings pop up in all good solutions [10]. Set these magic variables first, and crazy-long searches suddenly became quick and easy. They called this the "backdoor" to reducing computational complexity. Pretty tricky, right?
 
-[^xy]: Let _A,B_ be our two distance points.
-Let _A,B_ be separated by distance _c_. Let a point P have  a distance _a,b_ to the points _A,B_.
-The cosine rule says
-\\(P_x=\frac{a^2 + c^c - b^2}{2c}\\) and Pythagoras says \\(P_y=(a^2-x^2)^{0.5}\\).
+- Modern Feature Selection: Today's machine learning is built on this. Techniques like LASSO regression (which shrinks less important variable coefficients, sometimes to zero) or using feature importance scores from decision trees are all about finding and focusing on those powerhouse variables.
 
-<img align=right src="../img/fastmap.png">
+- Knowledge Distillation: Another cool, modern take on this is knowledge distillation. Here, a large, complex 'teacher' model (trained on tons of data) transfers its 'knowledge' to a much smaller, simpler 'student' model. The student model learns to mimic the teacher's outputs, effectively capturing the essential insights without all the bulk. It's like getting the CliffNotes version of a massive textbook, but it still aces the test.
 
-Then
-we can see 
-In the 1960s, Amarel
-observed that search problems contain _narrows); i.e. tiny sets
-of variable settings that must be used in any solution [11 ].
-Amarel’s work defined macros that encode paths between
-the narrows in the search space, effectively permitting a
-search engine to leap quickly from one narrow to another.
+Other work  in semi-supervised learning backs this up: you don't need to obsess over all your data. This field leans on a few cool ideas:
 
-In later work, data mining researchers in the 1990s
-explored and examined what happens when a data miner
-deliberately ignores some of the variables in the training
-data. Kohavi and John report trials of data sets where up
-to 80% of the variables can be ignored without degrading classification accuracy [13]. Note the similarity with
-Amarel’s work: it is more important to reason about a small
-set of important variables than about all the variables.
+- Continuity/Smoothness Assumption: Points close together probably share the same label. No big jumps in meaning for tiny data shifts.
+- Cluster Assumption: Data likes to hang out in clumps. Points in the same clump likely share a label. Decision boundaries should fall in the sparse areas between clumps.
+- Manifold Assumption: Your high-dimensional data often chills out on a simpler, lower-dimensional surface (the "manifold").
+These assumptions basically mean your data isn't a completely random mess; it has structure.
 
-At the same time, researchers in constraint satisfaction
-found “random search with retries” was a very effective
-strategy. Crawford and Baker reported that such searches
-took less time than a complete search to find more solutions
-using just a small number of retries [ 12]. Their ISAMP
-“iterative sampler” makes random choices within a model
-until it gets “stuck”; i.e. until further choices do not
-satisfy expectations. When “stuck”, ISAMP does not waste
-time fiddling with current choices (as was done by older
-chronological backtracking algorithms). Instead, ISAMP
-logs what decisions were made before getting “stuck”. It
-then performs a “retry”; i.e. resets and starts again, this
-time making other random choices to explore.
+If you know about the manifold assumption [73] and the Johnson-Lindenstrauss lemma [74] (which says you can project high-D data to lower-D space while mostly preserving distances), you're probably nodding along. But the data slashing you can do in, say, SE data is truly mind-blowing.
 
-Crawford and Baker explain the success of this strange
-approach by assuming models contain a small set of master
-variables that set the remaining variables (and this paper
-calls such master variables keys). Rigorously searching
-through all variable settings is not recommended when
-master variables are present, since only a small number of
-those settings actually matter. Further, when the master
-variables are spread thinly over the entire model, it makes
-no sense to carefully explore all parts of the model since
-much time will be wasted “walking” between the far-flung
-master variables. For such models, if the reasoning gets
-stuck in one region, then the best thing to do is to leap at
-random to some distant part of the model.
+For instance, Chen, Kocaguneli, Tu, Peters, and Xu et al. found they could predict GitHub issue close times, effort, and defects even after ditching labels for a whopping 80%, 91%, 97%, 98%, and even 100% (respectively) of their project data [65, 70-72, 75]. Massive datasets with thousands of rows? Sometimes, just a few dozen samples will do the trick [76] – maybe because software project data is full of repeating patterns [78] or follows power laws [77] (where a few items are hugely frequent/important, and most are rare).
 
-A similar conclusion comes from the work of Williams et
-al. [10]. They found that if a randomized search is repeated
-many times, that a small number of variable settings were
-shared by all solutions. They also found that if they set
-those variables before conducting the rest of the search,
-then formerly exponential runtimes collapsed to low-order
-polynomial time. They called these shared variables the
-backdoor to reducing computational complexity.
-
-More recent work on _semi-supervised learning_ showed that 
-it was not necessary to reason over all the data.
-Semi-supervised learning relies on several key assumptions about the data to effectively leverage both labeled and unlabeled data. These assumptions include the continuity assumption (or smoothness assumption), the cluster assumption, and the manifold assumption: 
-
-1. Continuity/Smoothness Assumption: This assumption states that data points that are close together in the input space are more likely to have the same label. In essence, if two data points are near each other, they are also likely to belong to the same class. 
-
-2. Cluster Assumption: This assumption suggests that the data can be grouped into distinct clusters, and data points within the same cluster are likely to have the same label. Decision boundaries are often placed between these high-density clusters. 
-
-3. Manifold Assumption: This assumption posits that the data lies on a lower-dimensional manifold within the high-dimensional input space. This means that the data is structured in a way that distances and densities can be meaningfully measured within this lower-dimensional space. 
-
-Readers familiar with the manifold assumption [73] and the
-Johnson-Lindenstrauss lemma [74] will be nodding sagely at this
-point– but the reductions seen in, say, SE data are startling. For example,
-Chen, Kocaguneli, Tu, Peters, and Xu et al. found they could predict
-for Github issue close time, effort estimation, and defect prediction,
-even after ignoring labels for 80%, 91%, 97%, 98%, 100% (respectively)
-of their project data labels [65],[70],[71],[72],[75]. Data sets
-with thousands of rows can be modeled with just a few dozen samples
-[76]– perhaps because of 
-large amounts of repeated
-structures [78] in the data from SE projects or
-power laws [77].
-
-my stuff with tables of data
+So, next time you're drowning in data, remember the Great Data Toss-Away. Less can seriously be more.
