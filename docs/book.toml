@@ -11,3 +11,5 @@ build-dir = "../../4gotn.github.io/docs"
 # ADD THIS
 [preprocessor.alerts]
 
+[output.html]
+mathjax-support = true
