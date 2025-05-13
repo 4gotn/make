@@ -59,58 +59,61 @@ class Num(o):
 
   def sub(i,x) : return i.add(x,-1)
 
-class Data(o):
-  def __init__(i, rows):
-    rows = iter(rows)
-    i.names, i.nums, i.goals, i.rows = next(rows), {}, {}, []
-    i.header()
-    [i.add(row) for row in rows]
-
-  def add(i, row, inc=1, purge=False):
-    "Add one row, update the num knowledge."
-    i.f = None
-    for c,n in i.nums.items():
-      x = row[c]
-      if x != "?":
-        row[c] = n.add(float(x),inc)
-    if inc==1 : i.rows.append(row)w
-    elif purge: i.rows.remove(row) # disabled by default sice remove is slow
-    return row
-
-  def bin(i,c,x): return i.nums[c].bins(c) if c in i.nums else x
-
-  def clone(i,rows=[]): return Data([i.names] + rows)
-
-  def header(i):
-    i.f = None
+class Meta(o):
+  def __init__(i,names):
+    i.names, i.nums, i.goals, i.n = names, {}, {}, 0
     for c,s in enumerate(i.names):
       if s[0].isupper():
         i.nums[c] = Num() # hi lo
         if s[-1] in "+-":
-          i.goals[c] = 0 if s[-1]=='-' else 1
+           i.goals[c] = 0 if s[-1]=='-' else 1
 
-  # need to be able to talk to a global space of discretization
-  def like(i, row, f, nh, nall):
-    _like = lambda c,b: (f[c][b] + the.m*prior) / (len(i.rows) + the.m + 1/BIG)
+  def sub(i,row): return i.sub(row,-1)
+  
+  def add(i, row, inc=1):
+    for c,n in i.nums.items():
+      x = row[c]
+      if x != "?":
+         row[c] = n.add(float(x),inc)
+    return row
+  
+class Data(o): 
+  def __init__(i, rows=[],base=None): 
+    rows = iter(rows)
+    if not base:
+     
+    [i.add(row) for row in rows]
+
+    if inc==1 : i.rows.append(row)
+    elif purge: i.rows.remove(row) # di
+  
+
+  def bin(i,c,x): 
+    z = Data.zero
+    return z.nums[c].bins(c) if c in z.nums else x
+
+  def clone(i,rows=[]): return Data([i.names] + rows)
+
+  def ok(i):
+    if not i.f:
+      i.f = lambda: defaultdict(lambda: defaultdict(int))
+      for row in rows or rows:
+        for c,x in enumerate(row):
+          if x != "?": 
+            i.f[c][ i.bin(c,x) ] += 1 
+    return i
+    
+  def like(i,  row, nh, nall):
+    _like = lambda c,b: (i.f[c][b] + the.m*prior) / (len(i.rows) + the.m + 1/BIG)
     prior = (len(i.rows) + the.k) / (nall + the.k*nh)
     tmp   = [_like(c, i.bin(c,x)) for c,x in enumerate(row) 
              if x != "?" and c not in goals]
     return sum(math.log(n) for n in tmp + [prior] if n>0)
-
-  def ok(i):
-    "Fill in the bins and the frequency counts."
-    if not i.f:
-      i.f  = lambda: defaultdict(lambda: defaultdict(int))
-      for row in i.rows:
-        for c,x in enumerate(row):
-          if x != "?": 
-            i.f[c][ i.bin(c,x) ] += 1
-    return i
-
-  def sort(i,rows=None): 
+    
+  def sort(i, rows=None): 
     (rows or i.rows).sort(key=lambda row: i.ydist(row)); return i
 
-  def sub(i,row, purge=False): i.add(row,-1,purge)
+  def sub(i, row, purge=False): i.add(row, -1, purge)
 
   def ydist(i,row):
     n= sum(abs(i.nums[c].norm(row[c]) - g) ** the.p for c,g in i.goals.items())
@@ -135,10 +138,15 @@ def actLearn(d):
   return o(best=best, rest=rest, todo=todo)
 
 #------------------------------------------------------------------------------
+def coerce(x):
+  try: return int(x)
+  except:
+    try: return float(x)
+    except: return x.strip()
+  
 def csv(file=None):
   for line in fileinput.input(file):
-    if line:
-      yield [x.strip() for x in line.split(",")]
+    if line: yield [coerce(x) for x in line.split(",")]
 
 def cli(d):
   for c,arg in enumerate(sys.argv):
