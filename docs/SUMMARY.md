@@ -3,7 +3,7 @@
 - [About the Author](0/author.md)
 - [0 : The Forgotten Bits ](0/about.md)
   - [Why read this book?](0/why.md)
-  - [The great secret](0/secret.md)
+  - [Just Enough Data](0/secret.md)
   - [Easier AI](0/active.md)
   - [Install](0/install.md)
 - [1 : A Quick Tour](1/overview.md)

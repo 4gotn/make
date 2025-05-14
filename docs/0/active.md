@@ -67,7 +67,7 @@ examples.
 <tt>min</tt> is the optimal example closest to heaven.</b>
 </center>
 
-The lesson here is that achieving state-of-the-art results can ne
+The lesson here is that achieving state-of-the-art results can be
 achieved with smarter questioning, not planetary-scale computation (i.e. big AI tools like large language models, or LLMs).
 Active learning addresses many common  concerns about AI such as slow
 training times, excessive energy needs, esoteric hardware requirements,
@@ -97,11 +97,12 @@ Active learning provides a compelling alternative to sheer scale in AI.
 questions the "bigger is better" assumption dominating current thinking
 about AI. 
 - It tell us that intelligence requires more than just size.
-- I am not the only one proposing weight loss for AI. 
-  - The success of 
+
+I am not the only one proposing weight loss for AI. 
+- The success of 
 [LLM distillation](refs.html#Zeming2024) (shrinking huge models for specific purposes) shows that
 giant models are not always necessary. 
-  - Active learning pushes this idea even
+- Active learning pushes this idea even
 further, showing that leaner, smarter modeling can achieve great results. 
-  - So
+- So
 why not, before we build the behemoth, try something smaller and faster?

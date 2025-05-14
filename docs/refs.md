@@ -1,5 +1,10 @@
 # References
 
+## A
+### Aha,1991
+Aha, D.W., Kibler, D. & Albert, M.K. 
+[Instance-based learning algorithms](https://link.springer.com/content/pdf/10.1007/BF00153759.pdf). Mach Learn 6, 37–66 (1991). https://doi.org/10.1007/BF00153759
+
 ## C
 ### Columbia,2003
 Columbia Accident Investigation Board (CAIB). (2003). 
@@ -47,6 +52,10 @@ barelogic/blob/main/src/bl.py.
 ### Menzies,MOOT
 T. Menzies. 2025. MOOT= Many multi-objective optimization tests. https://github.
 com/timm/moot/tree/master/optimize.
+
+###
+T. Menzies,2025a
+["Retrospective: Data Mining Static Code Attributes to Learn Defect Predictors"](https://www.computer.org/csdl/journal/ts/2025/03/10869331/23X97eE4Dv2) in IEEE Transactions on Software Engineering, vol. 51, no. 03, pp. 858-863, March 2025, doi: 10.1109/TSE.2025.3537406.
 
 ## N
 ### Nair,2018
